@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">TodoList</string>
+    <string name="time_st">Time</string>
+    <string name="day_st">Day</string>
+    <string name="hours_st">Hours</string>
+    <string name="job_st">Task</string>
+    <string name="add_st">Add</string>
+    <string name="hint_st">Enter new job</string>
+    <string name="add_hours">Choose Hours</string>
+    <string name="list_task">Tasks</string>
+    <string name="add_new">Add a new job</string>
+    <string name="choose_day">Choose Day</string>
+
+</resources>
