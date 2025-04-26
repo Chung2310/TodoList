@@ -1,37 +1,28 @@
 package com.example.todolist.retrofit;
 
-import com.example.todolist.model.JobModel;
-import com.example.todolist.model.MessageModel;
-import com.example.todolist.model.UserModel;
+import com.example.todolist.model.Task;
 
-import io.reactivex.rxjava3.core.Observable;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Query;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
 
 public interface Api {
-    @GET("dangnhap.php")
-    Observable<UserModel> dangNhap(
-            @Query("email") String email,
-            @Query("pass") String pass
-    );
+    @POST("/api/tasks")
+    Call<Task> createTask(@Header("Authorization") String token, @Body Task task);
 
-    @GET("dangki.php")
-    Observable<MessageModel> dangKi(
-            @Query("email") String email,
-            @Query("pass") String pass,
-            @Query("name") String name
-    );
-    @GET("getall.php")
-    Observable<JobModel> getAll();
-    @GET("addtask.php")
-    Observable<MessageModel> addTask(
-            @Query("id_job") String id_job,
-            @Query("task") String task,
-            @Query("day") String day,
-            @Query("hours") String hours
-    );
-    @GET("xoatask.php")
-    Observable<MessageModel> deleteTask(
-            @Query("id_job") String id_job
-    );
+    @GET("/api/tasks")
+    Call<List<Task>> getTasks(@Header("Authorization") String token);
+
+    @PUT("/api/tasks/{id}")
+    Call<Task> updateTask(@Header("Authorization") String token, @Path("id") long id, @Body Task task);
+
+    @DELETE("/api/tasks/{id}")
+    Call<Void> deleteTask(@Header("Authorization") String token, @Path("id") long id);
 }

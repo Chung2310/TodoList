@@ -1,6 +1,7 @@
 package com.example.todolist.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -17,26 +18,17 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.todolist.R;
-import com.example.todolist.model.User;
-import com.example.todolist.model.UserModel;
-import com.example.todolist.retrofit.Api;
-import com.example.todolist.retrofit.RetrofitClient;
-import com.example.todolist.utils.Utils;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-import io.paperdb.Paper;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DangNhapActivity extends AppCompatActivity {
 
-    TextView txtdangki,txtResetPass;
-    TextInputEditText txtemail,txtpassword;
-    AppCompatButton btnDangNhap;
-    Api api;
-    CompositeDisposable compositeDisposable = new CompositeDisposable();
-    boolean isLogin = false;
+    private FirebaseAuth firebaseAuth;
+    private TextInputEditText txtEmail,txtPass;
+    private TextView txtDangKi;
+    private AppCompatButton btnDangNhap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,110 +40,63 @@ public class DangNhapActivity extends AppCompatActivity {
             return insets;
         });
         anhXa();
-        initcontrol();
-        txtemail.setText("");
-        txtpassword.setText("");
-    }
-    private void initcontrol() {
-        txtdangki.setOnClickListener(new View.OnClickListener() {
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        Intent intent = getIntent();
+        if(intent != null){
+            txtEmail.setText(intent.getStringExtra("email"));
+            txtPass.setText(intent.getStringExtra("pass"));
+        }
+
+
+        txtDangKi.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), DangKiActivity.class);
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(),DangKiActivity.class);
                 startActivity(intent);
-            }
-        });
-        txtResetPass.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Intent intent = new Intent(getApplicationContext(),ResetPassActivity.class);
-                //startActivity(intent);
             }
         });
         btnDangNhap.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                String str_email = txtemail.getText().toString().trim();
-                String str_pass = txtpassword.getText().toString().trim();
-                if(TextUtils.isEmpty(str_email)){
-                    Toast.makeText(getApplicationContext(),"Hãy nhập email của bạn",Toast.LENGTH_LONG).show();
-                } else if(TextUtils.isEmpty(str_pass)) {
-                    Toast.makeText(getApplicationContext(),"Hãy nhập mật khẩu của bạn",Toast.LENGTH_LONG).show();
-                } else {
-
-                    Paper.book().write("email",str_email);
-                    Paper.book().write("pass",str_pass);
-                    dangNhap(str_email,str_pass);
-
+            public void onClick(View v) {
+                String email = txtEmail.getText().toString();
+                String password = txtPass.getText().toString();
+                if (email.isEmpty() || password.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(DangNhapActivity.this, task -> {
+                            if (task.isSuccessful()) {
+                                FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+                                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                                    if (user != null) {
+                                        user.getIdToken(false).addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                String idToken = task1.getResult().getToken();
+                                                // Lưu token vào SharedPreferences
+                                                SharedPreferences pref = getSharedPreferences("auth", MODE_PRIVATE);
+                                                pref.edit().putString("idToken", idToken).apply();
+                                            }
+                                        });
+                                    }
+                                });
+                                Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
     }
 
     private void anhXa() {
-        Paper.init(this);
-        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
-        txtdangki =findViewById(R.id.txtdangki);
-        txtemail = findViewById(R.id.txtemail);
-        txtpassword = findViewById(R.id.password);
+        txtEmail = findViewById(R.id.txtemail);
+        txtPass = findViewById(R.id.password);
+        txtDangKi = findViewById(R.id.txtdangki);
         btnDangNhap = findViewById(R.id.btnDangNhap);
-        txtResetPass = findViewById(R.id.resetPass);
-
-        if(Paper.book().read("email") != null && Paper.book().read("pass") != null){
-            txtemail.setText(Paper.book().read("email"));
-            txtpassword.setText(Paper.book().read("pass"));
-            if(Paper.book().read("islogin")!= null){
-                boolean flag = Paper.book().read("islogin");
-
-                if(flag){
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            dangNhap(Paper.book().read("email"), Paper.book().read("pass"));
-                        }
-                    },1000);
-                }
-            }
-        }
     }
 
-    private void dangNhap(String str_email, String str_pass) {
-        compositeDisposable.add(api.dangNhap(str_email,str_pass)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        userModel -> {
-                            if(userModel.isSuccess()){
-                                isLogin = true;
-                                Paper.book().write("islogin",isLogin);
-                                Paper.book().write("user",userModel.getResult());
-                                Utils.user_current = (User) userModel.getResult();
-
-                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                            else {
-                                Toast.makeText(getApplicationContext(),userModel.getMessage(),Toast.LENGTH_LONG).show();
-                            }
-
-                        },  throwable -> {
-                            Toast.makeText(getApplicationContext(),throwable.getMessage(),Toast.LENGTH_LONG).show();
-                        }
-                ));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(Utils.user_current.getEmail() != null && Utils.user_current.getPass() !=null){
-            txtemail.setText(Utils.user_current.getEmail());
-            txtpassword.setText(Utils.user_current.getPass());
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        compositeDisposable.clear();
-        super.onDestroy();
-    }
 }

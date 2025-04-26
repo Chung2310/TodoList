@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:orientation="vertical"
+    android:background="#ffefd5"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.DangKiActivity">
     <TextView
-        android:layout_marginTop="10dp"
-        android:id="@+id/txtdangnhap"
+
         app:layout_constraintTop_toTopOf="parent"
         android:text="Đăng ký"
         android:gravity="center"
@@ -71,17 +71,16 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        app:layout_constraintTop_toBottomOf="@+id/sdtxacthuc"
-        android:id="@+id/name_user"
+        app:layout_constraintTop_toBottomOf="@+id/passwordDK"
         style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
+            android:inputType="textPassword"
             android:hint="Họ và Tên"
-            android:id="@+id/txtusername"
+            android:id="@+id/txtten"
             android:drawablePadding="5dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"/>

@@ -47,35 +47,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Task task = taskList.get(position);
-        holder.taskText.setText(task.getTask());
-        holder.taskHours.setText(task.getHours());
-        holder.taskDay.setText(task.getDay());
+        holder.taskText.setText(task.getDescription());
+        holder.taskHours.setText(task.getCreatedAt());
 
         holder.imageButton.setOnClickListener(v -> {
             int currentPosition = holder.getAdapterPosition();
             if (currentPosition != RecyclerView.NO_POSITION) {
-                deleteTask(currentPosition, task.getId_job());
+
             }
         });
     }
-    private void deleteTask(int position, String taskId) {
-        compositeDisposable.add(api.deleteTask(taskId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        messageModel -> {
-                            if (messageModel.isSuccess()) {
-                                removeItem(position);
-                                Toast.makeText(context, messageModel.getMessage(), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(context, messageModel.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        },
-                        throwable -> {
-                            Toast.makeText(context, "Lỗi: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                ));
-    }
+
 
     public void removeItem(int position) {
         taskList.remove(position);
