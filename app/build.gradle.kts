@@ -59,4 +59,6 @@ dependencies {
 
     implementation ("com.airbnb.android:lottie:6.1.0")
     implementation ("com.google.android.material:material:1.6.0")
+    implementation ("androidx.work:work-runtime:2.9.0")
+    implementation ("com.google.guava:guava:31.1-android")
 }

@@ -24,11 +24,15 @@ import com.example.todolist.model.Task;
 import com.example.todolist.utils.Utils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,12 +96,22 @@ public class AddTaskActivity extends AppCompatActivity {
                 return;
             }
 
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            Date dateTime = null;
+            try {
+                dateTime = sdf.parse(date+ " " +time);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+
             Map<String, Object> task = new HashMap<>();
+            String input = date+time;
+            String result = input.replaceAll("[/:]", "");
+            task.put("ID", result);
             task.put("title", title);
             task.put("description", description);
             task.put("status", STATUS_UNFINISHED);
-            task.put("time", time);
-            task.put("date", date);
+            ;task.put("dueDateTime", new Timestamp(dateTime));
             task.put("userId", Utils.U_ID); // Thêm user ID
 
             db.collection("tasks")

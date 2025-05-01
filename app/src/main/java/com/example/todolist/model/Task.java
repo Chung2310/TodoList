@@ -1,20 +1,28 @@
 package com.example.todolist.model;
 
+import com.google.firebase.Timestamp;
+
 import java.io.Serializable;
 
 public class Task implements Serializable {
-    private String id;
+    private String ID;
     private String userId;
     private String title;
     private String description;
     private String status;
-    private String time;
-    private String date;
+    private Timestamp dueDateTime;
 
 
     // Getters and setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+
+    public String getID() {
+        return ID;
+    }
+
+    public void setID(String ID) {
+        this.ID = ID;
+    }
+
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
     public String getTitle() { return title; }
@@ -24,19 +32,11 @@ public class Task implements Serializable {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public String getTime() {
-        return time;
+    public Timestamp getDueDateTime() {
+        return dueDateTime;
     }
 
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String day) {
-        this.date = day;
+    public void setDueDateTime(Timestamp dueDateTime) {
+        this.dueDateTime = dueDateTime;
     }
 }

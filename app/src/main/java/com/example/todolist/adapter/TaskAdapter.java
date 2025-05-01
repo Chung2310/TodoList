@@ -1,6 +1,7 @@
 package com.example.todolist.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,10 @@ import com.example.todolist.R;
 import com.example.todolist.model.Task;
 import com.example.todolist.utils.Utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
@@ -41,7 +45,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.MyViewHolder> 
         holder.taskDes.setText(task.getDescription());
         holder.taskTitle.setText(task.getTitle());
         holder.taskStatus.setText(task.getStatus());
-        holder.taskTime.setText(task.getDate() + " " + task.getTime());
+        if(task.getStatus().equals("unfinished")){
+            holder.itemView.setBackgroundResource(R.drawable.item_nodone);
+        } else {
+            holder.itemView.setBackgroundResource(R.drawable.item_done);
+        }
+        Date date = task.getDueDateTime().toDate();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        String formattedDate = sdf.format(date);
+        holder.taskTime.setText(formattedDate);
 
     }
 
