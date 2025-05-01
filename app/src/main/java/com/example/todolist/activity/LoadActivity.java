@@ -14,8 +14,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.todolist.R;
+import com.example.todolist.utils.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.example.todolist.utils.Utils.*;
 
 public class LoadActivity extends AppCompatActivity {
 
@@ -63,7 +65,7 @@ public class LoadActivity extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
 
         if (currentUser != null) {
-            // Người dùng đã đăng nhập
+            Utils.U_ID = currentUser.getUid();
             navigateToMain();
         } else {
             // Kiểm tra token lưu trữ

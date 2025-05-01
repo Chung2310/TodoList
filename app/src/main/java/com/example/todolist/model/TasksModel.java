@@ -1,8 +1,11 @@
 package com.example.todolist.model;
 
-public class MessageModel {
+import java.util.List;
+
+public class TasksModel {
     private boolean success;
     private String message;
+    private List<Task> result;
 
     public boolean isSuccess() {
         return success;
@@ -18,5 +21,13 @@ public class MessageModel {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public List<Task> getResult() {
+        return result;
+    }
+
+    public void setResult(List<Task> result) {
+        this.result = result;
     }
 }

@@ -6,68 +6,75 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.AddTaskActivity"
-    android:padding="16dp">
-
+    tools:context=".activity.AddTaskActivity">
     <TextView
+        android:text="@string/title_st"
+        android:gravity="center"
+        android:textSize="20dp"
         android:textStyle="bold"
-        android:textSize="30dp"
-        android:text="@string/add_new"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/edtTitle"
+        android:textSize="20dp"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
-    <EditText
+    <TextView
+        android:text="@string/des_st"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:textStyle="bold"
         android:layout_marginTop="10dp"
-        android:id="@+id/taskInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/edtDes"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:textStyle="bold"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:id="@+id/btnPickDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/hint_st" />
+        android:text="@string/choose_day" />
 
-    <LinearLayout
-        android:orientation="horizontal"
+    <TextView
+        android:gravity="center"
+        android:id="@+id/tvDate"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnPickDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/choose_day" />
-        <TextView
-            android:id="@+id/tvDay"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnPickHours"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_hours" />
-        <TextView
-            android:id="@+id/tvHours"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:text=""
+        android:padding="10dp" />
 
     <androidx.appcompat.widget.AppCompatButton
+        android:textStyle="bold"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:id="@+id/btnPickTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/choose_hours" />
 
-        android:layout_marginTop="20dp"
-        android:layout_gravity="center"
-        android:id="@+id/btnAddToList"
+    <TextView
+        android:gravity="center"
+        android:id="@+id/tvTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:padding="10dp" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:textStyle="bold"
+        android:layout_gravity="end"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:id="@+id/btnAdd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/add_st" />
-
-
 </LinearLayout>

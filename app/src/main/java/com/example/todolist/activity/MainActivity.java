@@ -1,15 +1,20 @@
 package com.example.todolist.activity;
 
-import static com.example.todolist.utils.Utils.BASE_URL;
+import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
@@ -21,31 +26,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.todolist.R;
 import com.example.todolist.adapter.TaskAdapter;
 import com.example.todolist.model.Task;
-import com.example.todolist.retrofit.Api;
-import com.example.todolist.retrofit.RetrofitClient;
 import com.example.todolist.utils.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     AppCompatButton addButton;
     RecyclerView taskRecyclerView;
     TaskAdapter adapter;
-    List<Task> tasks = new ArrayList<>();
-
-    Retrofit retrofit = RetrofitClient.getInstance(BASE_URL);
-    Api api = retrofit.create(Api.class);;
+    List<Task> taskList = new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,56 +53,83 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        api = RetrofitClient.getInstance(BASE_URL).create(Api.class);
 
-
-        getAllTasks();
         anhXa();
-        setClick();
+
+
+
+        if(isConnected(this)){
+            setClick();
+            getAllTasks();
+
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"Không có Internet, vui lòng kết nối", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     private void getAllTasks() {
-        FirebaseAuth.getInstance().getCurrentUser().getIdToken(true)
+
+        db.collection("tasks")
+                .whereEqualTo("userId", Utils.U_ID)
+                .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        String token = "Bearer " + task.getResult().getToken();
+                        taskList = new ArrayList<>(); // Tạo mới danh sách
 
-                        Call<List<Task>> call = api.getTasks(token);
-                        call.enqueue(new Callback<List<Task>>() {
-                            @Override
-                            public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
-                                if (response.isSuccessful() && response.body() != null) {
-                                    tasks.clear(); // Xóa dữ liệu cũ
-                                    tasks.addAll(response.body()); // Thêm dữ liệu mới
-                                    setAdapter(); // Cập nhật RecyclerView
-                                } else {
-                                    Toast.makeText(MainActivity.this, "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show();
-                                }
-                            }
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            Task taskItem = doc.toObject(Task.class);
+                            taskItem.setId(doc.getId());
+                            taskList.add(taskItem);
+                        }
 
-                            @Override
-                            public void onFailure(Call<List<Task>> call, Throwable t) {
-                                Toast.makeText(MainActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                                Log.e("MainActivity", "Lỗi: ", t);
-                            }
-                        });
+                        // Sau khi có dữ liệu mới khởi tạo Adapter
+                        initAdapter();
                     } else {
-                        Toast.makeText(MainActivity.this, "Lỗi lấy token", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Lỗi khi tải dữ liệu", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+    private void initAdapter() {
+        // Kiểm tra nếu danh sách không null
+        if (taskList != null) {
+            adapter = new TaskAdapter(taskList, this);
+            taskRecyclerView.setAdapter(adapter);
+        } else {
+            Log.e("TaskListActivity", "Danh sách task là null");
+        }
+    }
+
+    private boolean isConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager != null) {
+            Network activeNetwork = connectivityManager.getActiveNetwork();
+            NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork);
+
+
+            if (networkCapabilities != null &&
+                    (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setClick() {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(getApplicationContext(), AddTaskActivity.class);
+                startActivity(intent);
             }
         });
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void setAdapter() {
+    private void setAdapter(List<Task> tasks) {
         adapter = new TaskAdapter(tasks,getApplicationContext());
         taskRecyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -118,16 +141,4 @@ public class MainActivity extends AppCompatActivity {
         taskRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-
-    @SuppressLint("NotifyDataSetChanged")
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
-                } else {
-                    setAdapter();
-                }
-
-    }
 }
